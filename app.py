@@ -36,6 +36,34 @@ st.subheader("📊 Sales by Category")
 cat_sales = df_sales.groupby("Category")["Total Sales ($)"].sum()
 st.bar_chart(cat_sales)
 
+# Load history from a separate published sheet URL (or add another gid= to your existing one)
+history_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTIOxcwKJY2-ejdabOGVSwIQQOC38KfTM7NmfiuXwJccDrmy0qoFSlFZPmBjckKSA/pub?gid=1464666016&single=true&output=csv"
+df_history = pd.read_csv(history_url)
+
+st.subheader("📆 Weekly Sales Trend")
+df_history["Week Starting"] = pd.to_datetime(df_history["Week Starting"])
+df_history = df_history.sort_values("Week Starting")
+
+st.line_chart(df_history.set_index("Week Starting")["Total Sales ($)"])
+
+delta = df_history["Total Sales ($)"].iloc[-1] - df_history["Total Sales ($)"].iloc[-2]
+st.metric("Change from Last Week", f"${delta:,.2f}", delta_color="inverse" if delta < 0 else "normal")
+
+st.subheader("⏰ Hourly Sales Heatmap")
+hourly = df_sales.groupby("Hour")["Total Sales ($)"].sum().reset_index()
+hourly = hourly.sort_values("Hour")  # Optional: order by time
+
+import altair as alt
+st.altair_chart(
+    alt.Chart(hourly).mark_bar().encode(
+        x=alt.X("Hour", sort=None),
+        y="Total Sales ($)",
+        tooltip=["Hour", "Total Sales ($)"]
+    ).properties(width=700),
+    use_container_width=True
+)
+
+
 # --- GPT Q&A ---
 st.subheader("💬 Ask GPT About This Week's Sales")
 user_question = st.text_input("Type your question about the week's sales:")
@@ -65,29 +93,3 @@ Answer this question from the manager:
         st.markdown("**🧠 GPT's Answer:**")
         st.write(response.choices[0].message.content)
 
-# Load history from a separate published sheet URL (or add another gid= to your existing one)
-history_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTIOxcwKJY2-ejdabOGVSwIQQOC38KfTM7NmfiuXwJccDrmy0qoFSlFZPmBjckKSA/pub?gid=1464666016&single=true&output=csv"
-df_history = pd.read_csv(history_url)
-
-st.subheader("📆 Weekly Sales Trend")
-df_history["Week Starting"] = pd.to_datetime(df_history["Week Starting"])
-df_history = df_history.sort_values("Week Starting")
-
-st.line_chart(df_history.set_index("Week Starting")["Total Sales ($)"])
-
-delta = df_history["Total Sales ($)"].iloc[-1] - df_history["Total Sales ($)"].iloc[-2]
-st.metric("Change from Last Week", f"${delta:,.2f}", delta_color="inverse" if delta < 0 else "normal")
-
-st.subheader("⏰ Hourly Sales Heatmap")
-hourly = df_sales.groupby("Hour")["Total Sales ($)"].sum().reset_index()
-hourly = hourly.sort_values("Hour")  # Optional: order by time
-
-import altair as alt
-st.altair_chart(
-    alt.Chart(hourly).mark_bar().encode(
-        x=alt.X("Hour", sort=None),
-        y="Total Sales ($)",
-        tooltip=["Hour", "Total Sales ($)"]
-    ).properties(width=700),
-    use_container_width=True
-)
