@@ -77,3 +77,17 @@ st.line_chart(df_history.set_index("Week Starting")["Total Sales ($)"])
 
 delta = df_history["Total Sales ($)"].iloc[-1] - df_history["Total Sales ($)"].iloc[-2]
 st.metric("Change from Last Week", f"${delta:,.2f}", delta_color="inverse" if delta < 0 else "normal")
+
+st.subheader("⏰ Hourly Sales Heatmap")
+hourly = df_sales.groupby("Hour")["Total Sales ($)"].sum().reset_index()
+hourly = hourly.sort_values("Hour")  # Optional: order by time
+
+import altair as alt
+st.altair_chart(
+    alt.Chart(hourly).mark_bar().encode(
+        x=alt.X("Hour", sort=None),
+        y="Total Sales ($)",
+        tooltip=["Hour", "Total Sales ($)"]
+    ).properties(width=700),
+    use_container_width=True
+)
