@@ -6,6 +6,8 @@ from openai import OpenAI
 
 # Load OpenAI key from Streamlit Secrets
 client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+st.write("✅ API Key loaded:", st.secrets["openai"]["api_key"][:6] + "••••••")
+
 
 # Replace this with your actual published Google Sheet CSV URL
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTIOxcwKJY2-ejdabOGVSwIQQOC38KfTM7NmfiuXwJccDrmy0qoFSlFZPmBjckKSA/pub?gid=1488049819&single=true&output=csv"
