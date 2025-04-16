@@ -8,7 +8,7 @@ from openai import OpenAI
 client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 # Replace this with your actual published Google Sheet CSV URL
-sheet_url = "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=0"
+sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTIOxcwKJY2-ejdabOGVSwIQQOC38KfTM7NmfiuXwJccDrmy0qoFSlFZPmBjckKSA/pub?gid=1488049819&single=true&output=csv"
 
 st.set_page_config(page_title="Clover Weekly Sales", layout="wide")
 st.title("☕️ Clover Weekly Sales Dashboard")
