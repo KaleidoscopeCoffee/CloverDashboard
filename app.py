@@ -5,6 +5,7 @@ import openai
 # Load secrets
 openai.api_key = st.secrets["openai"]["api_key"]
 sheet_url = "https://docs.google.com/spreadsheets/d/1KX1cFei3Ltj6IQH6yT7En9FJ-T0GOjLB/edit?usp=sharing&ouid=103835595275984669357&rtpof=true&sd=true"
+st.write(df_sales.columns)
 
 st.title("☕️ Clover Weekly Sales Dashboard")
 
