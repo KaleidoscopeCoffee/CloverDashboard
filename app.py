@@ -75,3 +75,5 @@ df_history = df_history.sort_values("Week Starting")
 
 st.line_chart(df_history.set_index("Week Starting")["Total Sales ($)"])
 
+delta = df_history["Total Sales ($)"].iloc[-1] - df_history["Total Sales ($)"].iloc[-2]
+st.metric("Change from Last Week", f"${delta:,.2f}", delta_color="inverse" if delta < 0 else "normal")
