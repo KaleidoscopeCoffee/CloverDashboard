@@ -1,43 +1,65 @@
 import streamlit as st
 import pandas as pd
-import openai
+from openai import OpenAI
 
-# Load secrets
-openai.api_key = st.secrets["openai"]["api_key"]
-sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTIOxcwKJY2-ejdabOGVSwIQQOC38KfTM7NmfiuXwJccDrmy0qoFSlFZPmBjckKSA/pub?gid=1488049819&single=true&output=csv"
+# --- SETUP ---
 
+# Load OpenAI key from Streamlit Secrets
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+
+# Replace this with your actual published Google Sheet CSV URL
+sheet_url = "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=0"
+
+st.set_page_config(page_title="Clover Weekly Sales", layout="wide")
 st.title("☕️ Clover Weekly Sales Dashboard")
 
+# --- LOAD DATA ---
 @st.cache_data
 def load_sales_data(url):
-    df = pd.read_csv(url)
-    return df
+    return pd.read_csv(url)
 
 df_sales = load_sales_data(sheet_url)
 
+# --- BASIC METRICS ---
 st.subheader("📈 Weekly Summary")
-st.metric("Total Sales ($)", f"${df_sales['Total Sales ($)'].sum():,.2f}")
+total_sales = df_sales["Total Sales ($)"].sum()
+st.metric("Total Sales", f"${total_sales:,.2f}")
+
+# --- TOP ITEMS ---
+st.subheader("🏆 Top 3 Items")
 top_items = df_sales.groupby("Item Name")["Quantity Sold"].sum().sort_values(ascending=False).head(3)
-st.write("**Top 3 Selling Items:**")
-st.write(top_items)
+st.dataframe(top_items)
 
-st.subheader("🧃 Sales by Category")
-cat_breakdown = df_sales.groupby("Category")["Total Sales ($)"].sum()
-st.bar_chart(cat_breakdown)
+# --- CATEGORY BREAKDOWN ---
+st.subheader("📊 Sales by Category")
+cat_sales = df_sales.groupby("Category")["Total Sales ($)"].sum()
+st.bar_chart(cat_sales)
 
+# --- GPT Q&A ---
 st.subheader("💬 Ask GPT About This Week's Sales")
-user_question = st.text_input("Ask a question about this week's sales:")
+user_question = st.text_input("Type your question about the week's sales:")
+
 if user_question:
-    context = df_sales.groupby("Item Name")[["Quantity Sold", "Total Sales ($)"]].sum().reset_index().to_string(index=False)
-    prompt = f"""This is weekly sales data for a coffee shop:\n{context}\n\nAnswer the following question about this data:\n{user_question}"""
+    with st.spinner("GPT is thinking..."):
+        # Build context from data
+        context_table = df_sales.groupby("Item Name")[["Quantity Sold", "Total Sales ($)"]].sum().reset_index().to_string(index=False)
+        prompt = f"""
+You are an insightful sales analyst for a local coffee shop. Based on this weekly sales data:
 
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a helpful business analyst for a local coffee shop."},
-            {"role": "user", "content": prompt}
-        ]
-    )
+{context_table}
 
-    st.markdown("**GPT Answer:**")
-    st.write(response["choices"][0]["message"]["content"])
+Answer this question from the manager:
+{user_question}
+"""
+
+        # Call GPT
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful sales analyst."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+
+        st.markdown("**🧠 GPT's Answer:**")
+        st.write(response.choices[0].message.content)
