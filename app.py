@@ -64,3 +64,14 @@ Answer this question from the manager:
 
         st.markdown("**🧠 GPT's Answer:**")
         st.write(response.choices[0].message.content)
+
+# Load history from a separate published sheet URL (or add another gid= to your existing one)
+history_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTIOxcwKJY2-ejdabOGVSwIQQOC38KfTM7NmfiuXwJccDrmy0qoFSlFZPmBjckKSA/pub?gid=1464666016&single=true&output=csv"
+df_history = pd.read_csv(history_url)
+
+st.subheader("📆 Weekly Sales Trend")
+df_history["Week Starting"] = pd.to_datetime(df_history["Week Starting"])
+df_history = df_history.sort_values("Week Starting")
+
+st.line_chart(df_history.set_index("Week Starting")["Total Sales ($)"])
+
