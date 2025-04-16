@@ -4,7 +4,7 @@ import openai
 
 # Load secrets
 openai.api_key = st.secrets["openai"]["api_key"]
-sheet_url = "https://docs.google.com/spreadsheets/d/1KX1cFei3Ltj6IQH6yT7En9FJ-T0GOjLB/edit?usp=sharing&ouid=103835595275984669357&rtpof=true&sd=true"
+sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTIOxcwKJY2-ejdabOGVSwIQQOC38KfTM7NmfiuXwJccDrmy0qoFSlFZPmBjckKSA/pub?gid=1488049819&single=true&output=csv"
 
 st.title("☕️ Clover Weekly Sales Dashboard")
 
